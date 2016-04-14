@@ -91,6 +91,11 @@ public class RecordFile {
         return rp.getInt(fldname) == 1;
     }
 
+    public float getFloat(String fldname) {
+        System.out.println(rp.getInt(fldname));
+        return Float.parseFloat(rp.getString(fldname));
+    }
+
     /**
      * Sets the value of the specified field in the current record.
      *
@@ -109,6 +114,11 @@ public class RecordFile {
             System.out.println("setBool (RecordFile): false");
             rp.setInt(fldname, 0);
         }
+    }
+
+    public void setFloat(String fldname, float val) {
+        System.out.println("setFloat(RecordFile): " + val);
+        rp.setString(fldname, String.valueOf(val));
     }
 
     /**
