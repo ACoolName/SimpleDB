@@ -101,8 +101,10 @@ public class NoDupsSortPlan implements Plan {
         temps.add(currenttemp);
         UpdateScan currentscan = currenttemp.open();
         while (copy(src, currentscan)) {
+//            System.out.println("while " + src.getString("name") + " " + currentscan.getString("name"));
             if (comp.compare(src, currentscan) < 0) {
                 // start a new run
+//                System.out.println("SHIT SHIT SHITSTORM");
                 currentscan.close();
                 currenttemp = new TempTable(sch, tx);
                 temps.add(currenttemp);
@@ -115,6 +117,7 @@ public class NoDupsSortPlan implements Plan {
 //                currentscan = (UpdateScan) currenttemp.open();
             }
         }
+//        System.out.println(temps.toString());
         currentscan.close();
         return temps;
     }
@@ -141,21 +144,40 @@ public class NoDupsSortPlan implements Plan {
         boolean hasmore1 = src1.next();
         boolean hasmore2 = src2.next();
         while (hasmore1 && hasmore2) {
-            if (comp.compare(src1, src2) < 0) {
+            System.out.println("merge " + src1.getString("name") + " " + src2.getString("name") + " " + comp.compare(src1, src2));
+            if (comp.compare(src1, src2) == 0) {
+//                System.out.println("I'M ALIVE!");
+                hasmore1 = copy(src1, dest);
+                hasmore2 = src2.next();
+            } else if (comp.compare(src1, src2) < 0) {
                 hasmore1 = copy(src1, dest);
                 // if the photosynthesises are the same don't include them in the result
-            } else if (comp.compare(src1, src2) > 0){
+            } else {
                 hasmore2 = copy(src2, dest);
             }
+//            System.out.println("Hasmore1 " + hasmore1 + " hasmore2 " + hasmore2);
         }
-
+        
+        Scan temp;
         if (hasmore1) {
             while (hasmore1) {
+                System.out.println("hasmore1 " + src1.getString("name"));
+                temp = src1;
                 hasmore1 = copy(src1, dest);
+                while (src1 == temp && hasmore1) {
+                    System.out.println("hasmore1 while " + src1.getString("name"));
+                    hasmore1 = src1.next();
+                }
             }
         } else {
             while (hasmore2) {
+                System.out.println("hasmore2 " + src2.getString("name"));
+                temp = src2;
                 hasmore2 = copy(src2, dest);
+                while (src2 == temp && hasmore2) {
+                    System.out.println("hasmore2 while " + src2.getString("name"));
+                    hasmore2 = src2.next();
+                }
             }
         }
         src1.close();
