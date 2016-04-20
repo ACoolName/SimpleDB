@@ -3,3 +3,4 @@ build/
 manifest.mf
 dist/
 nbproject/private
+nbproject/project.properties
