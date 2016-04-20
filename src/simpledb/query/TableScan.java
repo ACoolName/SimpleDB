@@ -1,6 +1,7 @@
 package simpledb.query;
 
 import static java.sql.Types.INTEGER;
+import static java.sql.Types.BOOLEAN;
 import simpledb.tx.Transaction;
 import simpledb.record.*;
 
@@ -48,16 +49,28 @@ public class TableScan implements UpdateScan {
     * otherwise, the getString method is called.
     * @see simpledb.query.Scan#getVal(java.lang.String)
     */
-   public Constant getVal(String fldname) {
-      if (sch.type(fldname) == INTEGER)
-         return new IntConstant(rf.getInt(fldname));
-      else
-         return new StringConstant(rf.getString(fldname));
-   }
+    public Constant getVal(String fldname) {
+        if (sch.type(fldname) == BOOLEAN) {
+            if(rf.getInt(fldname) == 1) {
+                return new BoolConstant(true);
+            } else if(rf.getInt(fldname) == 0) {
+                return new BoolConstant(false);
+            }
+        }
+        if (sch.type(fldname) == INTEGER) {
+            return new IntConstant(rf.getInt(fldname));
+        } else {
+            return new StringConstant(rf.getString(fldname));
+        }
+    }
    
    public int getInt(String fldname) {
       return rf.getInt(fldname);
    }
+   
+    public boolean getBool(String fldname) {
+        return rf.getBool(fldname);
+    }
    
    public String getString(String fldname) {
       return rf.getString(fldname);
@@ -77,15 +90,28 @@ public class TableScan implements UpdateScan {
     * @see simpledb.query.UpdateScan#setVal(java.lang.String, simpledb.query.Constant)
     */ 
    public void setVal(String fldname, Constant val) {
-      if (sch.type(fldname) == INTEGER)
-         rf.setInt(fldname, (Integer)val.asJavaVal());
-      else
-         rf.setString(fldname, (String)val.asJavaVal());
-   }
+        if (sch.type (fldname) == BOOLEAN) {
+            if((Boolean) val.asJavaVal() == true) {
+                rf.setInt(fldname, 1);
+            } else if((Boolean) val.asJavaVal() == false) {
+                rf.setInt(fldname, 0);
+            }
+        }
+        if (sch.type(fldname) == INTEGER) {
+            rf.setInt(fldname, (Integer) val.asJavaVal());
+        } else {
+            rf.setString(fldname, (String) val.asJavaVal());
+        }
+    }
    
    public void setInt(String fldname, int val) {
       rf.setInt(fldname, val);
    }
+   
+    public void setBool(String fldname, boolean val) {
+        System.out.println("setBool: " + val);
+        rf.setBool(fldname, val);
+    }
    
    public void setString(String fldname, String val) {
       rf.setString(fldname, val);

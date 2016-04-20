@@ -54,6 +54,10 @@ public class Schema {
       addField(fldname, VARCHAR, length);
    }
    
+   public void addBoolField(String fldname) {
+      addField(fldname, INTEGER, 0);
+   }
+   
    /**
     * Adds a field to the schema having the same
     * type and length as the corresponding field
