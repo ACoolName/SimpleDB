@@ -108,11 +108,11 @@ public class NoDupsSortPlan implements Plan {
                 temps.add(currenttemp);
                 currentscan = (UpdateScan) currenttemp.open();
                 
-            ///REEEEALLY NOT SURE IF THIS SH!T WILL WORK    
-            } else if (comp.compare(src, currentscan) == 0) {
-                //start a new run
-                currentscan.close();
-                currentscan = (UpdateScan) currenttemp.open();
+//            ///REEEEALLY NOT SURE IF THIS SH!T WILL WORK    
+//            } else if (comp.compare(src, currentscan) == 0) {
+//                //start a new run
+//                currentscan.close();
+//                currentscan = (UpdateScan) currenttemp.open();
             }
         }
         currentscan.close();
@@ -143,7 +143,8 @@ public class NoDupsSortPlan implements Plan {
         while (hasmore1 && hasmore2) {
             if (comp.compare(src1, src2) < 0) {
                 hasmore1 = copy(src1, dest);
-            } else {
+                // if the photosynthesises are the same don't include them in the result
+            } else if (comp.compare(src1, src2) > 0){
                 hasmore2 = copy(src2, dest);
             }
         }
