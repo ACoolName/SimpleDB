@@ -12,7 +12,7 @@ import java.util.*;
  * @author sciore
  *
  */
-public class NoDupsHeshScan implements Scan {
+public class NoDupsHashScan implements Scan {
    private UpdateScan s1, s2=null, currentscan=null;
    private RecordComparator comp;
    private boolean hasmore1, hasmore2=false;
@@ -25,7 +25,7 @@ public class NoDupsHeshScan implements Scan {
     * @param runs the list of runs
     * @param comp the record comparator
     */
-   public NoDupsHeshScan(List<TempTable> runs, RecordComparator comp) {
+   public NoDupsHashScan(List<TempTable> runs, RecordComparator comp) {
       this.comp = comp;
       s1 = (UpdateScan) runs.get(0).open();
       hasmore1 = s1.next();
