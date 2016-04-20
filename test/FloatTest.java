@@ -22,7 +22,7 @@ import simpledb.tx.Transaction;
  *
  * @author teo
  */
-public class BoolTest {
+public class FloatTest {
 
     static Transaction tx;
     static Schema schema;
@@ -38,7 +38,7 @@ public class BoolTest {
         schema = new Schema();
         schema.addStringField("name", TableMgr.MAX_NAME);
         schema.addIntField("age");
-        schema.addBoolField("hasAIDS");
+        schema.addFloatField("price");
         SimpleDB.mdMgr().createTable(tableName, schema, tx);
         TableInfo tableInfo = SimpleDB.mdMgr().getTableInfo(tableName, tx);
         RecordFile file = new RecordFile(tableInfo, tx);
@@ -46,17 +46,17 @@ public class BoolTest {
         file.insert();
         file.setString("name", "Peter");
         file.setInt("age", 23);
-        file.setBool("hasAIDS", true);
+        file.setFloat("price", 0.00f);
 
         file.insert();
         file.setString("name", "John");
         file.setInt("age", 23);
-        file.setBool("hasAIDS", false);
+        file.setFloat("price", 123.123f);
 
         file.insert();
         file.setString("name", "Ellen");
         file.setInt("age", 25);
-        file.setBool("hasAIDS", true);
+        file.setFloat("price", 9000.0000001f);
 
         tx.commit();
     }
@@ -72,21 +72,21 @@ public class BoolTest {
     }
 
     @Test
-    public void trueTest() {
+    public void floatTest() {
         TableInfo ti = new TableInfo(tableName, schema);
         TableScan ts = new TableScan(ti, tx);
         ts.beforeFirst();
         ts.next();
-        assertEquals(true, ts.getBool("hasAIDS"));
+        assertEquals(0.00f, ts.getFloat("price"), 0);
     }
     
     @Test
-    public void falseTest() {
+    public void floatTestSecondRow() {
         TableInfo ti = new TableInfo(tableName, schema);
         TableScan ts = new TableScan(ti, tx);
         ts.beforeFirst();
         ts.next();
         ts.next();
-        assertEquals(false, ts.getBool("hasAIDS"));
+        assertEquals(123.123f, ts.getFloat("price"), 0);
     }
 }
