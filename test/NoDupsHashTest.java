@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import simpledb.materialize.NoDupsSortPlan;
+import simpledb.materialize.NoDupsHashPlan;
 import simpledb.metadata.TableMgr;
 import simpledb.query.Scan;
 import simpledb.query.TablePlan;
@@ -25,9 +25,9 @@ import simpledb.tx.Transaction;
 
 /**
  *
- * @author teo
+ * @author Marek
  */
-public class NoDupsSortTest {
+public class NoDupsHashTest {
     
     static Transaction tx;
     static Schema schema;
@@ -35,7 +35,7 @@ public class NoDupsSortTest {
     static final String tableName = "mytable";
     static final String dbName = "mytestdb";
     
-    public NoDupsSortTest() {
+    public NoDupsHashTest() {
     }
     
     @BeforeClass
@@ -97,19 +97,19 @@ public class NoDupsSortTest {
     }
 
     @Test
-    public void sortNoDupsTest() {
+    public void hashNoDupsTest() {
         List<String> sortfields = new ArrayList<>();
         sortfields.add("name");
         TablePlan p = new TablePlan(tableName, tx);
-        NoDupsSortPlan sp = new NoDupsSortPlan(p, sortfields, tx);
-        Scan sortScan = sp.open();
-        sortScan.beforeFirst();
+        NoDupsHashPlan hp = new NoDupsHashPlan(p, sortfields, tx);
+        Scan hashScan = hp.open();
+        hashScan.beforeFirst();
         System.out.println("-----------------------------------------");
-        sortScan.next();
-        assertEquals("Ellen", sortScan.getString("name"));
-        sortScan.next();
-        assertEquals("John", sortScan.getString("name"));
-        sortScan.next();
-        assertEquals("Peter", sortScan.getString("name"));
+        hashScan.next();
+        assertEquals("Ellen", hashScan.getString("name"));
+        hashScan.next();
+        assertEquals("John", hashScan.getString("name"));
+        hashScan.next();
+        assertEquals("Peter", hashScan.getString("name"));
     }
 }

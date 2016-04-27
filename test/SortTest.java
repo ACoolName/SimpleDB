@@ -13,11 +13,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import simpledb.materialize.SortPlan;
+import simpledb.materialize.NoDupsSortPlan;
 import simpledb.metadata.TableMgr;
 import simpledb.query.Scan;
 import simpledb.query.TablePlan;
-import simpledb.query.TableScan;
 import simpledb.record.RecordFile;
 import simpledb.record.Schema;
 import simpledb.record.TableInfo;
@@ -66,6 +65,31 @@ public class SortTest {
         file.insert();
         file.setString("name", "Ellen");
         file.setInt("age", 22);
+        
+        file.insert();
+        file.setString("name", "Ellen");
+        file.setInt("age", 22);
+        
+        file.insert();
+        file.setString("name", "Peter");
+        file.setInt("age", 23);
+        
+        file.insert();
+        file.setString("name", "John");
+        file.setInt("age", 23);
+
+        file.insert();
+        file.setString("name", "John");
+        file.setInt("age", 23);
+
+        file.insert();
+        file.setString("name", "John");
+        file.setInt("age", 23);
+
+        file.insert();
+        file.setString("name", "John");
+        file.setInt("age", 23);
+
 
         tx.commit();
     }
@@ -89,14 +113,14 @@ public class SortTest {
         List<String> sortfields = new ArrayList<>();
         sortfields.add("name");
         TablePlan p = new TablePlan(tableName, tx);
-        SortPlan sp = new SortPlan(p, sortfields, tx);
+        NoDupsSortPlan sp = new NoDupsSortPlan(p, sortfields, tx);
         Scan sortScan = sp.open();
         sortScan.beforeFirst();
         sortScan.next();
         assertEquals("Ellen", sortScan.getString("name"));
         sortScan.next();
-        assertEquals("Ellen", sortScan.getString("name"));
-        sortScan.next();
+//        assertEquals("Ellen", sortScan.getString("name"));
+//        sortScan.next();
         assertEquals("John", sortScan.getString("name"));
         sortScan.next();
         assertEquals("Peter", sortScan.getString("name"));
