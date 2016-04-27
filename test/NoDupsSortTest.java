@@ -46,51 +46,40 @@ public class NoDupsSortTest {
         
         schema = new Schema();
         schema.addStringField("name", TableMgr.MAX_NAME);
-        schema.addIntField("age");
         SimpleDB.mdMgr().createTable(tableName, schema, tx);
         TableInfo tableInfo = SimpleDB.mdMgr().getTableInfo(tableName, tx);
         RecordFile file = new RecordFile(tableInfo, tx);
 
         file.insert();
         file.setString("name", "Peter");
-        file.setInt("age", 23);
 
         file.insert();
         file.setString("name", "Ellen");
-        file.setInt("age", 22);
 
         file.insert();
         file.setString("name", "Peter");
-        file.setInt("age", 23);
         
         file.insert();
         file.setString("name", "John");
-        file.setInt("age", 23);
         
         file.insert();
         file.setString("name", "Peter");
-        file.setInt("age", 23);
         
         file.insert();
         file.setString("name", "Peter");
-        file.setInt("age", 23);
         
         file.insert();
         file.setString("name", "Peter");
-        file.setInt("age", 23);
         
         file.insert();
         file.setString("name", "John");
-        file.setInt("age", 23);
 
         file.insert();
-        file.setString("name", "Ellen");
-        file.setInt("age", 22);
+        file.setString("name", "John");
         
         file.insert();
-        file.setString("name", "Ellen");
-        file.setInt("age", 22);
-
+        file.setString("name", "Peter");
+        
         tx.commit();
     }
     
@@ -116,42 +105,12 @@ public class NoDupsSortTest {
         NoDupsSortPlan sp = new NoDupsSortPlan(p, sortfields, tx);
         Scan sortScan = sp.open();
         sortScan.beforeFirst();
+        System.out.println("-----------------------------------------");
         sortScan.next();
-        System.out.println(sortScan.getString("name"));
+        assertEquals("Ellen", sortScan.getString("name"));
         sortScan.next();
-        System.out.println(sortScan.getString("name"));
+        assertEquals("John", sortScan.getString("name"));
         sortScan.next();
-        System.out.println(sortScan.getString("name"));
-        sortScan.next();
-        System.out.println(sortScan.getString("name"));
-        sortScan.next();
-        System.out.println(sortScan.getString("name"));
-        sortScan.next();
-        System.out.println(sortScan.getString("name"));
-        sortScan.next();
-        System.out.println(sortScan.getString("name"));
-        sortScan.next();
-        System.out.println(sortScan.getString("name"));
-        sortScan.next();
-        System.out.println(sortScan.getString("name"));
-        sortScan.next();
-        System.out.println(sortScan.getString("name"));
-//        assertEquals("Ellen", sortScan.getString("name"));
-//        sortScan.next();
-//        assertEquals("Ellen", sortScan.getString("name"));
-//        sortScan.next();
-//        assertEquals("John", sortScan.getString("name"));
-//        sortScan.next();
-//        assertEquals("Peter", sortScan.getString("name"));
+        assertEquals("Peter", sortScan.getString("name"));
     }
-    
-//    @Test
-//    public void floatTestSecondRow() {
-//        TableInfo ti = new TableInfo(tableName, schema);
-//        TableScan ts = new TableScan(ti, tx);
-//        ts.beforeFirst();
-//        ts.next();
-//        ts.next();
-//        assertEquals(123.123f, ts.getFloat("price"), 0);
-//    }
 }

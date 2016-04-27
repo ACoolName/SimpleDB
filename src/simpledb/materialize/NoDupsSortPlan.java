@@ -45,7 +45,7 @@ public class NoDupsSortPlan implements Plan {
         while (runs.size() > 2) {
             runs = doAMergeIteration(runs);
         }
-        return new SortScan(runs, comp);
+        return new NoDupsSortScan(runs, comp);
     }
 
     /**
@@ -92,29 +92,26 @@ public class NoDupsSortPlan implements Plan {
     }
 
     private List<TempTable> splitIntoRuns(Scan src) {
+        UpdateScan updateScan = (UpdateScan) src;
         List<TempTable> temps = new ArrayList<TempTable>();
-        src.beforeFirst();
-        if (!src.next()) {
+        updateScan.beforeFirst();
+        if (!updateScan.next()) {
             return temps;
         }
         TempTable currenttemp = new TempTable(sch, tx);
         temps.add(currenttemp);
         UpdateScan currentscan = currenttemp.open();
-        while (copy(src, currentscan)) {
-//            System.out.println("while " + src.getString("name") + " " + currentscan.getString("name"));
-            if (comp.compare(src, currentscan) < 0) {
+        while (copy(updateScan, currentscan)) {
+            System.out.println("while " + updateScan.getString("name") + " " + currentscan.getString("name"));
+            if (comp.compare(updateScan, currentscan) < 0) {
                 // start a new run
-//                System.out.println("SHIT SHIT SHITSTORM");
                 currentscan.close();
                 currenttemp = new TempTable(sch, tx);
                 temps.add(currenttemp);
                 currentscan = (UpdateScan) currenttemp.open();
                 
-//            ///REEEEALLY NOT SURE IF THIS SH!T WILL WORK    
-//            } else if (comp.compare(src, currentscan) == 0) {
-//                //start a new run
-//                currentscan.close();
-//                currentscan = (UpdateScan) currenttemp.open();
+            } else if (comp.compare(updateScan, currentscan) == 0) {
+                currentscan.delete();
             }
         }
 //        System.out.println(temps.toString());
@@ -136,8 +133,8 @@ public class NoDupsSortPlan implements Plan {
     }
 
     private TempTable mergeTwoRuns(TempTable p1, TempTable p2) {
-        Scan src1 = p1.open();
-        Scan src2 = p2.open();
+        UpdateScan src1 = (UpdateScan) p1.open();
+        UpdateScan src2 = (UpdateScan) p2.open();
         TempTable result = new TempTable(sch, tx);
         UpdateScan dest = result.open();
 
@@ -147,8 +144,8 @@ public class NoDupsSortPlan implements Plan {
             System.out.println("merge " + src1.getString("name") + " " + src2.getString("name") + " " + comp.compare(src1, src2));
             if (comp.compare(src1, src2) == 0) {
 //                System.out.println("I'M ALIVE!");
-                hasmore1 = copy(src1, dest);
-                hasmore2 = src2.next();
+                hasmore1 = src1.next();
+                src2.delete();
             } else if (comp.compare(src1, src2) < 0) {
                 hasmore1 = copy(src1, dest);
                 // if the photosynthesises are the same don't include them in the result
@@ -158,28 +155,39 @@ public class NoDupsSortPlan implements Plan {
 //            System.out.println("Hasmore1 " + hasmore1 + " hasmore2 " + hasmore2);
         }
         
-        Scan temp;
         if (hasmore1) {
             while (hasmore1) {
-                System.out.println("hasmore1 " + src1.getString("name"));
-                temp = src1;
                 hasmore1 = copy(src1, dest);
-                while (src1 == temp && hasmore1) {
-                    System.out.println("hasmore1 while " + src1.getString("name"));
-                    hasmore1 = src1.next();
-                }
             }
         } else {
             while (hasmore2) {
-                System.out.println("hasmore2 " + src2.getString("name"));
-                temp = src2;
                 hasmore2 = copy(src2, dest);
-                while (src2 == temp && hasmore2) {
-                    System.out.println("hasmore2 while " + src2.getString("name"));
-                    hasmore2 = src2.next();
-                }
             }
         }
+        
+        
+//        Scan temp;
+//        if (hasmore1) {
+//            while (hasmore1) {
+//                System.out.println("hasmore1 " + src1.getString("name"));
+//                temp = src1;
+//                hasmore1 = copy(src1, dest);
+//                while (src1 == temp && hasmore1) {
+//                    System.out.println("hasmore1 while " + src1.getString("name"));
+//                    hasmore1 = src1.next();
+//                }
+//            }
+//        } else {
+//            while (hasmore2) {
+//                System.out.println("hasmore2 " + src2.getString("name"));
+//                temp = src2;
+//                hasmore2 = copy(src2, dest);
+//                while (src2 == temp && hasmore2) {
+//                    System.out.println("hasmore2 while " + src2.getString("name"));
+//                    hasmore2 = src2.next();
+//                }
+//            }
+//        }
         src1.close();
         src2.close();
         dest.close();
@@ -189,6 +197,7 @@ public class NoDupsSortPlan implements Plan {
     private boolean copy(Scan src, UpdateScan dest) {
         dest.insert();
         for (String fldname : sch.fields()) {
+            System.out.println(src.getVal(fldname));
             dest.setVal(fldname, src.getVal(fldname));
         }
         return src.next();

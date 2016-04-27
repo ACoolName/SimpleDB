@@ -59,28 +59,30 @@ public class NoDupsSortScan implements Scan {
     * scan is chosen to be the new current scan.
     * @see simpledb.query.Scan#next()
     */
-   public boolean next() {
-      if (currentscan != null) {
-         if (currentscan == s1)
-            hasmore1 = s1.next();
-         else if (currentscan == s2)
-            hasmore2 = s2.next();
-      }
-      
-      if (!hasmore1 && !hasmore2)
-         return false;
-      else if (hasmore1 && hasmore2) {
-         if (comp.compare(s1, s2) < 0)
+    public boolean next() {
+        if (currentscan != null) {
+            if (currentscan == s1) {
+                hasmore1 = s1.next();
+            } else if (currentscan == s2) {
+                hasmore2 = s2.next();
+            }
+        }
+        if (!hasmore1 && !hasmore2) {
+            return false;
+        } else if (hasmore1 && hasmore2) {
+            if (comp.compare(s1, s2) < 0) {
+                currentscan = s1;
+            } else {
+                hasmore1 = s1.next();
+                currentscan = s2;
+            }
+        } else if (hasmore1) {
             currentscan = s1;
-         else
+        } else if (hasmore2) {
             currentscan = s2;
-      }
-      else if (hasmore1)
-         currentscan = s1;
-      else if (hasmore2)
-         currentscan = s2;
-      return true;
-   }
+        }
+        return true;
+    }
    
    /**
     * Closes the two underlying scans.
